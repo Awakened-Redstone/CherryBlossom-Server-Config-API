@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "cherryblossom-server-config",
+  "version": "${version}",
+  "name": "CherryBlossom Server Config API",
+  "description": "A config library for serverside mods",
+  "authors": [
+    "Awakened Redstone"
+  ],
+  "contact": {
+    "homepage": "",
+    "sources": ""
+  },
+  "license": "LGPL-3.0",
+  "icon": "assets/cherryblossom-server-config/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.awakenedredstone.cbserverconfig.CBServerConfig"
+    ]
+  },
+  "mixins": [
+    "cherryblossom-server-config.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.14.10",
+    "fabric-api": "*",
+    "minecraft": "~1.19.2"
+  }
+}
