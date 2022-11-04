@@ -21,7 +21,7 @@ public class PotionProcessor extends ConfigProcessor<String> implements IconSupp
 	public void openConfig() {}
 
 	@Override
-	public CBGuiElement getIcon(String value) {
+	public CBGuiElement generateIcon(String value) {
 		Potion potion = Registry.POTION.get(new Identifier(value));
 		return CBGuiElementBuilder.from(PotionUtil.setPotion(new ItemStack(Items.POTION), potion)).build();
 	}

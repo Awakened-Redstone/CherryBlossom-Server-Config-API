@@ -22,7 +22,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class ConfigProcessor {
 
@@ -54,7 +53,7 @@ public class ConfigProcessor {
             CBGuiElementBuilder element;
             if (iconAnnotation != null) {
                 try {
-                    element = CBGuiElementBuilder.from(iconAnnotation.value().getConstructor().newInstance().getIcon(null));
+                    element = CBGuiElementBuilder.from(iconAnnotation.value().getConstructor().newInstance().generateIcon(null));
                 } catch (NullPointerException | NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
                     throw new UnsupportedOperationException(e);
                 }
@@ -112,7 +111,7 @@ public class ConfigProcessor {
                         Object cast = field.getType().cast(value);
                         IconSupplier<?> supplier = iconAnnotation.value().getConstructor().newInstance();
 
-                        Method method = iconAnnotation.value().getMethod("getIcon", field.getType());
+                        Method method = iconAnnotation.value().getMethod("generateIcon", field.getType());
                         element = CBGuiElementBuilder.from(supplier.getIcon(field.get(config)));
                     } catch (NullPointerException | NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
                         throw new UnsupportedOperationException(e);
