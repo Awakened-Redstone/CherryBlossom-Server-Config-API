@@ -32,7 +32,7 @@ public class ConfigCommand {
             List<CBGuiElement> elements = ConfigProcessor.buildFileItems();
 
             SimpleGuiBuilder guiBuilder = new SimpleGuiBuilder(ScreenHandlerType.GENERIC_9X6, false);
-            guiBuilder.setTitle(Text.literal("Test"));
+            guiBuilder.setTitle(Text.literal("Configurations"));
 
             for (CBGuiElement element : elements) {
                 guiBuilder.addSlot(element);
