@@ -17,4 +17,10 @@ public class Icons {
             return new CBGuiElementBuilder(Items.POTATO).build();
         }
     }
+
+    public static class GlowInkSac implements IconSupplier<Object> {
+        public CBGuiElement generateIcon(Object value) {
+            return new CBGuiElementBuilder(Items.GLOW_INK_SAC).build();
+        }
+    }
 }

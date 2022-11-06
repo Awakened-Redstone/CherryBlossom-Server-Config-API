@@ -102,6 +102,7 @@ public class ConfigManager<T extends Config> {
     }
 
     public static <T extends Config> ConfigManager<T> register(Identifier identifier, Class<T> clazz, boolean useFolder, boolean uniqueIcons) {
+        if (configs.containsKey(identifier)) throw new UnsupportedOperationException(String.format("Config %s is already registered!", identifier));
         ConfigManager<T> manager = new ConfigManager<>(identifier, clazz, useFolder, uniqueIcons);
         configs.put(identifier, manager);
         return manager;

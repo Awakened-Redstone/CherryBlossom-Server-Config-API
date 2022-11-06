@@ -1,5 +1,6 @@
 package com.awakenedredstone.cbserverconfig.util;
 
+import com.awakenedredstone.cbserverconfig.CBServerConfig;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -25,8 +26,7 @@ public class JsonHelper {
 
                 return element;
             } catch (Exception e) {
-                System.err.printf("Failed to parse the JSON file '%s'%n", fileName);
-                e.printStackTrace();
+                CBServerConfig.LOGGER.error(String.format("Failed to parse the JSON file '%s'%n", file.getAbsolutePath()), e);
             }
         }
 
@@ -43,16 +43,14 @@ public class JsonHelper {
 
             return true;
         } catch (IOException e) {
-            System.err.printf("Failed to write JSON data to file '%s'%n", file.getAbsolutePath());
-            e.printStackTrace();
+            CBServerConfig.LOGGER.error(String.format("Failed to write JSON data to file '%s'%n", file.getAbsolutePath()), e);
         } finally {
             try {
                 if (writer != null) {
                     writer.close();
                 }
             } catch (Exception e) {
-                System.err.println("Failed to close JSON file");
-                e.printStackTrace();
+                CBServerConfig.LOGGER.error("Failed to close JSON file", e);
             }
         }
 

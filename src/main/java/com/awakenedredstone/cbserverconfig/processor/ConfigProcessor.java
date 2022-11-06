@@ -5,20 +5,27 @@ import com.awakenedredstone.cbserverconfig.annotation.Description;
 import com.awakenedredstone.cbserverconfig.annotation.Icon;
 import com.awakenedredstone.cbserverconfig.annotation.Name;
 import com.awakenedredstone.cbserverconfig.api.IconSupplier;
+import com.awakenedredstone.cbserverconfig.api.config.Config;
+import com.awakenedredstone.cbserverconfig.api.config.ConfigEntryProcessor;
 import com.awakenedredstone.cbserverconfig.api.config.ConfigManager;
 import com.awakenedredstone.cbserverconfig.exception.IllegalFieldException;
 import com.awakenedredstone.cbserverconfig.polymer.CBGuiElement;
 import com.awakenedredstone.cbserverconfig.polymer.CBGuiElementBuilder;
 import com.awakenedredstone.cbserverconfig.util.Texts;
+import com.awakenedredstone.cbserverconfig.util.Utils;
+import eu.pb4.sgui.api.elements.GuiElementInterface;
 import eu.pb4.sgui.api.gui.SimpleGui;
 import eu.pb4.sgui.api.gui.SimpleGuiBuilder;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.crash.CrashException;
+import net.minecraft.util.crash.CrashReport;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +37,9 @@ public class ConfigProcessor {
             try {
                 for (Field field : configManager.targetClass.getDeclaredFields()) {
                     if (Modifier.isStatic(field.getModifiers())) {
-                        throw new IllegalFieldException(String.format("%s is not allowed to have static fields!", field.getDeclaringClass().getName()));
+                        IllegalFieldException exception = new IllegalFieldException(String.format("%s is not allowed to have static fields!", field.getDeclaringClass().getName()));
+                        CBServerConfig.LOGGER.error("Illegal field!", exception);
+                        continue;
                     }
 
                     CBServerConfig.LOGGER.info("Field: {}, Value: {}, Default value: {}", field.getName(), field.get(configManager.getConfig()),
@@ -73,8 +82,17 @@ public class ConfigProcessor {
                 SimpleGuiBuilder guiBuilder = new SimpleGuiBuilder(ScreenHandlerType.GENERIC_9X6, false);
                 guiBuilder.setTitle(Texts.of(name));
 
-                for (CBGuiElement element2 : elements) {
-                    guiBuilder.addSlot(element);
+                CBGuiElementBuilder returnItem = new CBGuiElementBuilder(Items.BARRIER);
+                returnItem.setName(Texts.of("<red>Go back</red>"));
+                returnItem.setCallback((index1, type1, action1, gui1) -> {
+                    gui.close();
+                    gui.open();
+                });
+
+                guiBuilder.setSlot(53, returnItem.build());
+
+                for (CBGuiElement element2 : elements2) {
+                    guiBuilder.addSlot(element2);
                 }
 
                 SimpleGui gui2 = guiBuilder.build(gui.getPlayer());
@@ -88,13 +106,15 @@ public class ConfigProcessor {
         return elements;
     }
 
-    public static <T> List<CBGuiElement> buildFields(T config) {
+    public static <T extends Config> List<CBGuiElement> buildFields(T config) {
         List<CBGuiElement> elements = new ArrayList<>();
 
         try {
             for (Field field : config.getClass().getDeclaredFields()) {
                 if (Modifier.isStatic(field.getModifiers())) {
-                    throw new IllegalFieldException(String.format("%s is not allowed to have static fields!", field.getDeclaringClass().getName()));
+                    IllegalFieldException exception = new IllegalFieldException(String.format("%s is not allowed to have static fields!", field.getDeclaringClass().getName()));
+                    CrashReport crash = CrashReport.create(exception, "Illegal static field");
+                    throw new CrashException(crash);
                 }
 
                 Icon iconAnnotation = field.getAnnotation(Icon.class);
@@ -108,10 +128,14 @@ public class ConfigProcessor {
                         var value = field.get(config);
                         assert field.getType().isInstance(value);
 
-                        Object cast = field.getType().cast(value);
+                        try {
+                            iconAnnotation.value().getConstructor();
+                        } catch (NoSuchMethodException e) {
+                            CrashReport crash = CrashReport.create(new IllegalArgumentException("An icon supplier must have a constructor without parameters!", e), "Illegal icon supplier");
+                            throw new CrashException(crash);
+                        }
                         IconSupplier<?> supplier = iconAnnotation.value().getConstructor().newInstance();
 
-                        Method method = iconAnnotation.value().getMethod("generateIcon", field.getType());
                         element = CBGuiElementBuilder.from(supplier.getIcon(field.get(config)));
                     } catch (NullPointerException | NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
                         throw new UnsupportedOperationException(e);
@@ -129,8 +153,20 @@ public class ConfigProcessor {
                 element.addLoreLine(Text.literal(String.format("Value: %s", field.get(config))));
                 element.addLoreLine(Text.literal(String.format("Default value: %s", field.get(config.getClass().getConstructor().newInstance()))));
 
+                ConfigEntryProcessor<?> processor = Utils.getProcessor(field, config);
+
+                if (processor == null) {
+                    element.addLoreLine(Text.empty());
+                    element.addLoreLine(Texts.of("<red>Missing valid config processor!</red>"));
+                }
+
                 element.setCallback((index, type, action, gui) -> {
-                    gui.getPlayer().sendMessage(Text.literal("Boop!"));
+                    if (processor == null) {
+                        gui.getPlayer().sendMessage(Text.literal("No valid processor found for this option!").formatted(Formatting.RED));
+                        return;
+                    }
+
+                    processor.openConfig(gui);
                 });
 
                 elements.add(element.build());
