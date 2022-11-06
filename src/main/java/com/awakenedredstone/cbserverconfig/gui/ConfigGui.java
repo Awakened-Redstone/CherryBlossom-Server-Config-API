@@ -10,6 +10,7 @@ import com.awakenedredstone.cbserverconfig.polymer.CBGuiElementBuilder;
 import com.awakenedredstone.cbserverconfig.polymer.CBSimpleGuiBuilder;
 import com.awakenedredstone.cbserverconfig.util.Texts;
 import com.awakenedredstone.cbserverconfig.util.Utils;
+import eu.pb4.sgui.api.ClickType;
 import eu.pb4.sgui.api.gui.GuiInterface;
 import eu.pb4.sgui.api.gui.SimpleGui;
 import eu.pb4.sgui.api.gui.SlotGuiInterface;
@@ -60,7 +61,12 @@ public class ConfigGui {
             if (page < maxPage) gui.setSlot(gui.getSize() - 8, nextPage);
             if (page > 0) gui.setSlot(gui.getSize() - 9, prevPage);
 
-            CBGuiElementBuilder discardChanges = new CBGuiElementBuilder(Items.BARRIER).setName(Texts.of("<red>Discard changes")).setCallback((index, type, action, gui1) -> {
+            CBGuiElementBuilder discardChanges = new CBGuiElementBuilder(Items.BARRIER)
+                    .setName(Texts.of("<red>Discard changes"))
+                    .addLoreLine(Text.empty())
+                    .addLoreLine(Texts.of("<gray>Shift left click to discard changes"))
+                    .setCallback((index, type, action, gui1) -> {
+                if (type != ClickType.MOUSE_LEFT_SHIFT) return;
                 gui.getPlayer().playSound(SoundEvents.UI_BUTTON_CLICK, SoundCategory.MASTER, 0.3f, 1);
                 if (parent != null) {
                     parent.close();
@@ -69,7 +75,12 @@ public class ConfigGui {
             });
             gui.setSlot(gui.getSize() - 2, discardChanges);
 
-            CBGuiElementBuilder saveChanges = new CBGuiElementBuilder(Items.EMERALD).setName(Texts.of("<green>Save changes")).setCallback((index, type, action, gui1) -> {
+            CBGuiElementBuilder saveChanges = new CBGuiElementBuilder(Items.EMERALD)
+                    .setName(Texts.of("<green>Save changes"))
+                    .addLoreLine(Text.empty())
+                    .addLoreLine(Texts.of("<gray>Left click to save the changes"))
+                    .setCallback((index, type, action, gui1) -> {
+                if (type != ClickType.MOUSE_LEFT) return;
                 gui.getPlayer().playSound(SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.MASTER, 0.3f, 1);
                 for (ConfigEntry entry : entries) {
                     try {
