@@ -1,8 +1,9 @@
 package com.awakenedredstone.cbserverconfig;
 
+import com.awakenedredstone.cbserverconfig.api.config.ConfigEntryProcessorManager;
 import com.awakenedredstone.cbserverconfig.api.config.ConfigManager;
 import com.awakenedredstone.cbserverconfig.command.ConfigCommand;
-import com.awakenedredstone.cbserverconfig.processor.ConfigProcessor;
+import com.awakenedredstone.cbserverconfig.internal.*;
 import com.mojang.brigadier.CommandDispatcher;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
@@ -21,16 +22,22 @@ public class CBServerConfig implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-		ServerLifecycleEvents.SERVER_STARTING.register(server -> {
-			ConfigManager.getConfigs().forEach((id, manager) -> manager.loadOrCreateConfig());
-			ConfigProcessor.test();
-		});
+		ServerLifecycleEvents.SERVER_STARTING.register(server -> ConfigManager.getConfigs().forEach((id, manager) -> manager.loadOrCreateConfig()));
 		ServerLifecycleEvents.START_DATA_PACK_RELOAD.register((server, resourceManager)  -> ConfigManager.getConfigs().forEach((id, manager) -> {
 			boolean success = manager.loadOrCreateConfig();
 			if (success) server.getCommandSource().sendFeedback(Text.literal("Loaded config " + manager.getFilePath()), true);
 			else server.getCommandSource().sendFeedback(Text.literal("Failed to load config " + manager.getFilePath()).formatted(Formatting.RED), true);
 		}));
 		CommandRegistrationCallback.EVENT.register(this::initCommands);
+
+        ConfigEntryProcessorManager.register(String.class, StringEntryProcessor.class);
+        ConfigEntryProcessorManager.register(boolean.class, BooleanEntryProcessor.class);
+        ConfigEntryProcessorManager.register(double.class, DoubleEntryProcessor.class);
+        ConfigEntryProcessorManager.register(float.class, FloatEntryProcessor.class);
+        ConfigEntryProcessorManager.register(long.class, LongEntryProcessor.class);
+        ConfigEntryProcessorManager.register(int.class, IntegerEntryProcessor.class);
+        ConfigEntryProcessorManager.register(short.class, ShortEntryProcessor.class);
+        ConfigEntryProcessorManager.register(byte.class, ByteEntryProcessor.class);
 	}
 
 	private void initCommands(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {

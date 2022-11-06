@@ -11,6 +11,7 @@ public class BooleanEntryProcessor extends ConfigEntryProcessor<Boolean> {
 
     @Override
     public void openConfig(SlotGuiInterface gui) {
-
+        markDirty();
+        this.value = !value;
     }
 }

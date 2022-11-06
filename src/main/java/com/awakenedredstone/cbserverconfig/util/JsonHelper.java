@@ -4,6 +4,7 @@ import com.awakenedredstone.cbserverconfig.CBServerConfig;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -58,7 +59,7 @@ public class JsonHelper {
     }
 
     @Nullable
-    public static JsonObject getNestedObject(JsonObject parent, String key, boolean create) {
+    public static JsonObject getNestedObject(@NotNull JsonObject parent, String key, boolean create) {
         if (!parent.has(key) || !parent.get(key).isJsonObject()) {
             if (!create) {
                 return null;

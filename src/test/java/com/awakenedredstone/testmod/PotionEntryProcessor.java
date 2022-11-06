@@ -1,6 +1,7 @@
 package com.awakenedredstone.testmod;
 
 import com.awakenedredstone.cbserverconfig.api.config.ConfigEntryProcessor;
+import com.awakenedredstone.cbserverconfig.internal.gui.StringInputGui;
 import com.awakenedredstone.cbserverconfig.polymer.CBGuiElementBuilder;
 import com.awakenedredstone.cbserverconfig.util.Texts;
 import eu.pb4.sgui.api.gui.SimpleGui;
@@ -8,6 +9,12 @@ import eu.pb4.sgui.api.gui.SimpleGuiBuilder;
 import eu.pb4.sgui.api.gui.SlotGuiInterface;
 import net.minecraft.item.Items;
 import net.minecraft.screen.ScreenHandlerType;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registry;
+
+import java.util.Optional;
 
 public class PotionEntryProcessor extends ConfigEntryProcessor<String> {
 
@@ -17,19 +24,12 @@ public class PotionEntryProcessor extends ConfigEntryProcessor<String> {
 
 	@Override
 	public void openConfig(SlotGuiInterface gui) {
-		SimpleGuiBuilder guiBuilder = new SimpleGuiBuilder(ScreenHandlerType.GENERIC_9X6, false);
-		guiBuilder.setTitle(Texts.of(entryName));
-
-		CBGuiElementBuilder returnItem = new CBGuiElementBuilder(Items.BARRIER);
-		returnItem.setName(Texts.of("<red>Go back</red>"));
-		returnItem.setCallback((index1, type1, action1, gui1) -> {
+		new PotionInputGui(gui.getPlayer(), value, value -> Optional.empty(), value -> {
+			markDirty();
+			gui.getPlayer().playSound(SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.MASTER, 0.3f, 1);
+			this.value = value;
 			gui.close();
 			gui.open();
 		});
-
-		guiBuilder.setSlot(53, returnItem.build());
-
-		SimpleGui gui1 = guiBuilder.build(gui.getPlayer());
-		gui1.open();
 	}
 }

@@ -15,6 +15,9 @@ public class PotionIconSupplier implements IconSupplier<String> {
     @Override
     public CBGuiElement generateIcon(String value) {
         Potion potion = Registry.POTION.get(new Identifier(value));
-        return CBGuiElementBuilder.from(PotionUtil.setPotion(new ItemStack(Items.POTION), potion)).build();
+        return CBGuiElementBuilder.from(PotionUtil.setPotion(new ItemStack(Items.POTION), potion))
+                .hideFlag(ItemStack.TooltipSection.ADDITIONAL)
+                .hideFlag(ItemStack.TooltipSection.MODIFIERS)
+                .hideFlag(ItemStack.TooltipSection.DYE).build();
     }
 }

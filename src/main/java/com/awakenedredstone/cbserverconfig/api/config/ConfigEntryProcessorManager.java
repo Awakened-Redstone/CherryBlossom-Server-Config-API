@@ -1,12 +1,18 @@
 package com.awakenedredstone.cbserverconfig.api.config;
 
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.UnmodifiableView;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ConfigProcessorManager {
+public class ConfigEntryProcessorManager {
     private static final Map<Class<?>, Class<? extends ConfigEntryProcessor<?>>> configProcessors = new HashMap<>();
 
+    @Contract(pure = true)
+    @NotNull @UnmodifiableView
     public static Map<Class<?>, Class<? extends ConfigEntryProcessor<?>>> getConfigProcessors() {
         return Collections.unmodifiableMap(configProcessors);
     }

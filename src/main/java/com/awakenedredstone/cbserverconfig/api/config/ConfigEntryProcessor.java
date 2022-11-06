@@ -3,6 +3,7 @@ package com.awakenedredstone.cbserverconfig.api.config;
 import eu.pb4.sgui.api.gui.SlotGuiInterface;
 
 public abstract class ConfigEntryProcessor<T> {
+    private boolean dirty;
     protected final String entryName;
     protected final T currentValue;
     protected final T defaultValue;
@@ -16,6 +17,16 @@ public abstract class ConfigEntryProcessor<T> {
     }
 
     public abstract void openConfig(SlotGuiInterface gui);
+
+    public void resetValue() {
+        markDirty();
+        this.value = currentValue;
+    }
+
+    public void resetToDefault() {
+        markDirty();
+        this.value = defaultValue;
+    }
 
     public T getValue() {
         return value;
@@ -31,5 +42,14 @@ public abstract class ConfigEntryProcessor<T> {
 
     public String getEntryName() {
         return entryName;
+    }
+
+    protected void markDirty() {
+        this.dirty = true;
+    }
+
+    public boolean isDirty() {
+        if (value != currentValue) markDirty();
+        return dirty;
     }
 }

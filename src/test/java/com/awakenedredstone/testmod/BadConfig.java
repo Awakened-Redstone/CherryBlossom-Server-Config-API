@@ -8,7 +8,7 @@ import com.awakenedredstone.cbserverconfig.annotation.Processor;
 @Name("A <red>bad</red> test config!")
 @Icon(Icons.GlowInkSac.class)
 @Description("An example of a bad config class")
-public class BadConfig implements com.awakenedredstone.cbserverconfig.api.config.Config {
+public class BadConfig extends com.awakenedredstone.cbserverconfig.api.config.Config {
     @Description("An example of a <red>primary</red> on the config")
     public int integer = 0;
     @Icon(Icons.String.class)
