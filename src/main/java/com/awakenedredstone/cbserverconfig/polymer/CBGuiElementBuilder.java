@@ -10,12 +10,13 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.registry.Registries;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
-import net.minecraft.util.registry.Registry;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -54,7 +55,8 @@ public class CBGuiElementBuilder extends eu.pb4.sgui.api.elements.GuiElementBuil
      * @param stack the stack to base the builder of
      * @return the constructed builder
      */
-    public static CBGuiElementBuilder from(ItemStack stack) {
+    @NotNull
+    public static CBGuiElementBuilder from(@NotNull ItemStack stack) {
         CBGuiElementBuilder builder = new CBGuiElementBuilder(stack.getItem(), stack.getCount());
         NbtCompound tag = stack.getOrCreateNbt().copy();
 
@@ -75,7 +77,7 @@ public class CBGuiElementBuilder extends eu.pb4.sgui.api.elements.GuiElementBuil
 
         if (stack.hasEnchantments()) {
             for (NbtElement enc : stack.getEnchantments()) {
-                Registry.ENCHANTMENT.getOrEmpty(Identifier.tryParse(((NbtCompound) enc).getString("id"))).ifPresent(enchantment -> builder.enchant(enchantment, ((NbtCompound) enc).getInt("lvl")));
+                Registries.ENCHANTMENT.getOrEmpty(Identifier.tryParse(((NbtCompound) enc).getString("id"))).ifPresent(enchantment -> builder.enchant(enchantment, ((NbtCompound) enc).getInt("lvl")));
             }
             tag.remove("Enchantments");
         }
@@ -90,15 +92,17 @@ public class CBGuiElementBuilder extends eu.pb4.sgui.api.elements.GuiElementBuil
         return builder;
     }
 
-    public static CBGuiElementBuilder from(CBGuiElement element) {
-        CBGuiElementBuilder builder = (CBGuiElementBuilder) from(element.getItemStack());
+    @NotNull
+    public static CBGuiElementBuilder from(@NotNull CBGuiElement element) {
+        CBGuiElementBuilder builder = from(element.getItemStack());
         builder.callback = element.getGuiCallback();
 
         return builder;
     }
 
-    public static CBGuiElementBuilder fromSimple(CBGuiElement element) {
-        return (CBGuiElementBuilder) from(element.getItemStack());
+    @NotNull
+    public static CBGuiElementBuilder fromSimple(@NotNull CBGuiElement element) {
+        return from(element.getItemStack());
     }
 
     /**
@@ -118,7 +122,7 @@ public class CBGuiElementBuilder extends eu.pb4.sgui.api.elements.GuiElementBuil
      * @param name the name to use
      * @return this element builder
      */
-    public CBGuiElementBuilder setName(Text name) {
+    public CBGuiElementBuilder setName(@NotNull Text name) {
         this.name = name.copy();
         return this;
     }
@@ -169,7 +173,7 @@ public class CBGuiElementBuilder extends eu.pb4.sgui.api.elements.GuiElementBuil
     }
 
     /**
-     * Hides all {@link net.minecraft.item.ItemStack.TooltipSection}s from the element display
+     * Hides all {@link ItemStack.TooltipSection}s from the element display
      *
      * @return this element builder
      */
@@ -179,19 +183,19 @@ public class CBGuiElementBuilder extends eu.pb4.sgui.api.elements.GuiElementBuil
     }
 
     /**
-     * Hides a {@link net.minecraft.item.ItemStack.TooltipSection}
+     * Hides a {@link ItemStack.TooltipSection}
      * from the elements display.
      *
      * @param section the section to hide
      * @return this element builder
      */
-    public CBGuiElementBuilder hideFlag(ItemStack.TooltipSection section) {
+    public CBGuiElementBuilder hideFlag(@NotNull ItemStack.TooltipSection section) {
         this.hideFlags = (byte) (this.hideFlags | section.getFlag());
         return this;
     }
 
     /**
-     * Set the {@link net.minecraft.item.ItemStack.TooltipSection}s to
+     * Set the {@link ItemStack.TooltipSection}s to
      * hide from the elements display, by the flags.
      *
      * @param value the flags to hide
@@ -258,7 +262,7 @@ public class CBGuiElementBuilder extends eu.pb4.sgui.api.elements.GuiElementBuil
      * @param server  the server instance, used to get the textures
      * @return this element builder
      */
-    public CBGuiElementBuilder setSkullOwner(GameProfile profile, @Nullable MinecraftServer server) {
+    public CBGuiElementBuilder setSkullOwner(@NotNull GameProfile profile, @Nullable MinecraftServer server) {
         if (profile.getId() != null && server != null) {
             profile = server.getSessionService().fillProfileProperties(profile, false);
             this.getOrCreateNbt().put("SkullOwner", NbtHelper.writeGameProfile(new NbtCompound(), profile));

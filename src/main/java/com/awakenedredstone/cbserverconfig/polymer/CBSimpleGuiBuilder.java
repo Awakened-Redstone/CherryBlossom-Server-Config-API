@@ -13,6 +13,7 @@ import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
 
@@ -167,11 +168,11 @@ public class CBSimpleGuiBuilder implements SlotHolder {
         this.setSlot(this.getFirstEmptySlot(), itemStack);
     }
 
-    public void setSlot(int index, GuiElementBuilderInterface<?> element) {
+    public void setSlot(int index, @NotNull GuiElementBuilderInterface<?> element) {
         this.setSlot(index, element.build());
     }
 
-    public void addSlot(GuiElementBuilderInterface<?> element) {
+    public void addSlot(@NotNull GuiElementBuilderInterface<?> element) {
         this.setSlot(this.getFirstEmptySlot(), element.build());
     }
 

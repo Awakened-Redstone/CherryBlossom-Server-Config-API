@@ -1,6 +1,6 @@
-package com.awakenedredstone.cbserverconfig.internal.gui;
+package com.awakenedredstone.cbserverconfig.editor;
 
-import com.awakenedredstone.cbserverconfig.gui.Icons;
+import com.awakenedredstone.cbserverconfig.ui.Icons;
 import com.awakenedredstone.cbserverconfig.polymer.CBGuiElementBuilder;
 import eu.pb4.sgui.api.elements.GuiElementBuilder;
 import eu.pb4.sgui.api.gui.AnvilInputGui;
@@ -14,12 +14,12 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class ShortInputGui extends AnvilInputGui {
-    private final Consumer<Short> callback;
-    private final Function<Short, Optional<Text>> errorFunction;
-    private short value;
+public class IntegerInputGui extends AnvilInputGui {
+    private final Consumer<Integer> callback;
+    private final Function<Integer, Optional<Text>> errorFunction;
+    private int value;
 
-    public ShortInputGui(ServerPlayerEntity player, short defaultValue, Function<Short, Optional<Text>> errorFunction, Consumer<Short> callback) {
+    public IntegerInputGui(ServerPlayerEntity player, int defaultValue, Function<Integer, Optional<Text>> errorFunction, Consumer<Integer> callback) {
         super(player, false);
         this.errorFunction = errorFunction;
         this.value = defaultValue;
@@ -32,7 +32,7 @@ public class ShortInputGui extends AnvilInputGui {
     public void onInput(String input) {
         GuiElementBuilder item;
         try {
-            value = Short.parseShort(input);
+            value = Integer.parseInt(input);
             Optional<Text> error = errorFunction.apply(value);
             if (error.isPresent()) {
                 if (error.get() instanceof MutableText mutableText) {

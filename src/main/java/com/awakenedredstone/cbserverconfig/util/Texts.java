@@ -10,7 +10,21 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 public class Texts {
-    public static Text of(String key, @NotNull Consumer<Map<String, String>> builder) {
+    private static final Consumer<Map<String, String>> EMPTY_CONSUMER = a -> {/**/};
+
+    public static Text of(String key, Map<String, String> map) {
+        return of(key, m -> m.putAll(map));
+    }
+
+    public static Text of(String key, Consumer<Map<String, String>> builder) {
+        return TextParserUtils.formatText(translate(key, builder));
+    }
+
+    public static Text of(String key) {
+        return of(key, EMPTY_CONSUMER);
+    }
+
+    private static String translate(String key, @NotNull Consumer<Map<String, String>> builder) {
         String text = Language.getInstance().get(key);
         Map<String, String> placeholders = new HashMap<>();
         builder.accept(placeholders);
@@ -19,10 +33,7 @@ public class Texts {
             String v = placeholders.get(k);
             text = text.replaceAll(k, v);
         }
-        return TextParserUtils.formatText(text);
-    }
 
-    public static Text of(String key) {
-        return of(key, (m) -> {/**/});
+        return text;
     }
 }

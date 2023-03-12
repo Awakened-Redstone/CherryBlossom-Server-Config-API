@@ -1,6 +1,6 @@
-package com.awakenedredstone.cbserverconfig.internal.gui;
+package com.awakenedredstone.cbserverconfig.editor;
 
-import com.awakenedredstone.cbserverconfig.gui.Icons;
+import com.awakenedredstone.cbserverconfig.ui.Icons;
 import com.awakenedredstone.cbserverconfig.polymer.CBGuiElementBuilder;
 import eu.pb4.sgui.api.elements.GuiElementBuilder;
 import eu.pb4.sgui.api.gui.AnvilInputGui;

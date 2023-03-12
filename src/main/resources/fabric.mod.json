@@ -16,7 +16,7 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "com.awakenedredstone.cbserverconfig.CBServerConfig"
+        "com.awakenedredstone.cbserverconfig.CBServerConfig"
     ]
   },
   "mixins": [
