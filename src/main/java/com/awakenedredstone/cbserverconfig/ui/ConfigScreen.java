@@ -24,6 +24,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -41,7 +42,7 @@ public class ConfigScreen extends SimpleGui {
     private final Predicate<Option> filterPredicate;
 
     private int page = 0;
-    private int maxPage = 0;
+    private final int maxPage;
 
     @SuppressWarnings("rawtypes")
     public ConfigScreen(ServerPlayerEntity player, @NotNull ConfigWrapper<?> config, @Nullable GuiInterface parent, @Nullable Predicate<Option> filterPredicate) {
@@ -71,8 +72,8 @@ public class ConfigScreen extends SimpleGui {
                 .addLoreLine(Texts.of("text.cbsc.config.search.tooltip"))
                 .addLoreLine(Texts.of("<red>Not yet implemented"))
                 .setCallback((index, type, action, gui) -> {
-                    if (type != ClickType.MOUSE_LEFT_SHIFT) return;
-                    this.player.playSound(SoundEvents.UI_BUTTON_CLICK.value(), SoundCategory.MASTER, 0.3f, 1);
+                    if (type != ClickType.MOUSE_LEFT) return;
+                    this.player.playSound(SoundEvents.ITEM_SPYGLASS_USE, SoundCategory.MASTER, 1f, 1);
 
                     this.player.sendMessage(Texts.of("<red>Not yet implemented"));
                 });
@@ -84,8 +85,8 @@ public class ConfigScreen extends SimpleGui {
                 .addLoreLine(Texts.of("text.cbsc.config.sections.tooltip"))
                 .addLoreLine(Texts.of("<red>Not yet implemented"))
                 .setCallback((index, type, action, gui) -> {
-                    if (type != ClickType.MOUSE_LEFT_SHIFT) return;
-                    this.player.playSound(SoundEvents.UI_BUTTON_CLICK.value(), SoundCategory.MASTER, 0.3f, 1);
+                    if (type != ClickType.MOUSE_LEFT) return;
+                    this.player.playSound(SoundEvents.ENTITY_FOX_TELEPORT, SoundCategory.MASTER, 0.5f, 1);
 
                     this.player.sendMessage(Texts.of("<red>Not yet implemented"));
                 });
@@ -97,7 +98,7 @@ public class ConfigScreen extends SimpleGui {
                 .addLoreLine(Texts.of("text.cbsc.config.button.reload.tooltip"))
                 .setCallback((index, type, action, gui) -> {
                     if (type != ClickType.MOUSE_LEFT_SHIFT) return;
-                    this.player.playSound(SoundEvents.UI_BUTTON_CLICK.value(), SoundCategory.MASTER, 0.3f, 1);
+                    this.player.playSound(SoundEvents.ITEM_BOOK_PAGE_TURN, SoundCategory.MASTER, 1f, 1);
                     this.config.load();
 
                     values.clear();
@@ -142,6 +143,8 @@ public class ConfigScreen extends SimpleGui {
                     this.close();
                 });
         this.setSlot(this.getSize() - 1, saveChanges);
+
+        update();
     }
 
     @Override
@@ -159,7 +162,7 @@ public class ConfigScreen extends SimpleGui {
         };
 
         values.entrySet().stream()
-                .filter(entry -> this.filterPredicate != null && filterPredicate.test(entry.getKey()))
+                .filter(entry -> this.filterPredicate == null || filterPredicate.test(entry.getKey()))
                 .skip(page * 7L)
                 .limit(7)
                 .forEachOrdered(optionEntry -> setConfigItem(a.slot++, optionEntry));
@@ -177,7 +180,7 @@ public class ConfigScreen extends SimpleGui {
             int slot = 10;
         };
         values.entrySet().stream()
-                .filter(entry -> this.filterPredicate != null && filterPredicate.test(entry.getKey()))
+                .filter(entry -> this.filterPredicate == null || filterPredicate.test(entry.getKey()))
                 .skip(page * 7L)
                 .limit(7)
                 .forEachOrdered(optionEntry -> {
@@ -195,12 +198,17 @@ public class ConfigScreen extends SimpleGui {
         Option<?> option = entry.getKey();
         var value = entry.getValue();
         @Nullable EditorRegistry.EditCallback<?> editor = EditorRegistry.getEditor(option.clazz(), option.key());
+        @NotNull ParserRegistry.Parser<?> parser = ParserRegistry.getParser(option.clazz(), option.key());
         CBGuiElementBuilder builder = new CBGuiElementBuilder();
         builder.setItem(Items.PAPER);
         builder.setName(Texts.of(option.translationKey()));
-        builder.addLoreLine(Texts.of("text.cbsc.config.value", new MapBuilder.StringMap().putAny("%value%", value).build()));
-        builder.addLoreLine(Texts.of("text.cbsc.config.current_value", new MapBuilder.StringMap().putAny("%value%", option.value()).build()));
-        builder.addLoreLine(Texts.of("text.cbsc.config.default_value", new MapBuilder.StringMap().putAny("%value%", option.defaultValue()).build()));
+        builder.addLoreLine(Texts.of("text.cbsc.config.value", new MapBuilder.StringMap().putAny("%value%", getString(parser, value)).build()));
+        builder.addLoreLine(Texts.of("text.cbsc.config.current_value", new MapBuilder.StringMap().putAny("%value%", getString(parser, option.value())).build()));
+        builder.addLoreLine(Texts.of("text.cbsc.config.default_value", new MapBuilder.StringMap().putAny("%value%", getString(parser, option.defaultValue())).build()));
+        builder.addLoreLine(Text.empty());
+        builder.addLoreLine(Texts.of("text.cbsc.tip.edit"));
+        builder.addLoreLine(Texts.of("text.cbsc.tip.reset"));
+        builder.addLoreLine(Texts.of("text.cbsc.tip.default"));
         if (option.syncMode() == Option.SyncMode.OVERRIDE_CLIENT) {
             builder.addLoreLine(Text.empty());
             builder.addLoreLine(Texts.of("text.cbsc.config.client_override_unsupported"));
@@ -215,11 +223,20 @@ public class ConfigScreen extends SimpleGui {
                         if (editor == null) return;
                         this.getPlayer().playSound(SoundEvents.UI_BUTTON_CLICK.value(), SoundCategory.MASTER, 0.3f, 1);
                         EditorRegistry.trigger(editor, value, type, action, this).whenComplete((o, throwable) -> values.put(option, o));
+                        quickUpdate();
                     }
-                    /*case MOUSE_RIGHT -> {
-                        this.player.playSound(SoundEvents.UI_BUTTON_CLICK.value(), SoundCategory.MASTER, 0.3f, 1);
-                        this.player.sendMessage(Texts.of("<red>Not yet implemented"));
-                    }*/
+                    case MOUSE_RIGHT -> {
+                        if (values.get(option) == option.value()) break;
+                        this.player.playSound(SoundEvents.ENTITY_BLAZE_SHOOT, SoundCategory.MASTER, 0.3f, 1);
+                        values.put(option, option.value());
+                        update();
+                    }
+                    case DROP -> {
+                        if (values.get(option) == option.defaultValue()) break;
+                        this.player.playSound(SoundEvents.BLOCK_GLASS_BREAK, SoundCategory.MASTER, 0.3f, 1);
+                        values.put(option, option.defaultValue());
+                        quickUpdate();
+                    }
                     default -> {
                         return;
                     }
@@ -239,6 +256,10 @@ public class ConfigScreen extends SimpleGui {
     private boolean isVisible(@NotNull Option<?> option) {
         if (option.backingField().hasAnnotation(ExcludeFromScreen.class)) return false;
         var parentKey = option.key().parent();
-        return parentKey.isRoot() || !this.config.fieldForKey(parentKey).isAnnotationPresent(ExcludeFromScreen.class);
+        return parentKey.isRoot() || !Objects.requireNonNull(this.config.fieldForKey(parentKey)).isAnnotationPresent(ExcludeFromScreen.class);
+    }
+
+    public String getString(ParserRegistry.Parser<?> parser, Object value) {
+        return ParserRegistry.parse(parser, value);
     }
 }

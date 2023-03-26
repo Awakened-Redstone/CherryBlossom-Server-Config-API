@@ -12,7 +12,7 @@ public class ConfigCommand {
 
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         dispatcher.register(literal("cherryblossom").requires(source -> source.hasPermissionLevel(2))
-                .then(literal("config2")
+                .then(literal("config")
                         .executes(context -> execute(context.getSource()))
         ));
     }

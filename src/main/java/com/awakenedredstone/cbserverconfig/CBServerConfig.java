@@ -1,7 +1,10 @@
 package com.awakenedredstone.cbserverconfig;
 
 import com.awakenedredstone.cbserverconfig.editor.DefaultEditors;
+import com.awakenedredstone.cbserverconfig.ui.DefaultParsers;
 import com.awakenedredstone.cbserverconfig.ui.EditorRegistry;
+import com.awakenedredstone.cbserverconfig.ui.ParserRegistry;
+import io.wispforest.owo.ui.core.Color;
 import net.fabricmc.api.ModInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +15,13 @@ public class CBServerConfig implements ModInitializer {
 
     @Override
     public void onInitialize() {
+        //TODO: Support parents
+        //TODO: Identifier support
+        //TODO: Color support
+        //TODO: UUID support
+
         EditorRegistry.register(String.class, DefaultEditors.STRING);
+        //TODO: Support lists
 
         EditorRegistry.register(boolean.class, DefaultEditors.BOOLEAN);
         EditorRegistry.register(Boolean.class, DefaultEditors.BOOLEAN);
@@ -34,5 +43,7 @@ public class CBServerConfig implements ModInitializer {
 
         EditorRegistry.register(byte.class, DefaultEditors.BYTE);
         EditorRegistry.register(Byte.class, DefaultEditors.BYTE);
+
+        ParserRegistry.register(Color.class, DefaultParsers.COLOR);
     }
 }
