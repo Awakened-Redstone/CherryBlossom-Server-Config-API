@@ -1,11 +1,7 @@
 package com.awakenedredstone.cbserverconfig.ui;
 
-import eu.pb4.sgui.api.ClickType;
-import eu.pb4.sgui.api.gui.SlotGuiInterface;
 import io.wispforest.owo.config.Option;
-import net.minecraft.screen.slot.SlotActionType;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
