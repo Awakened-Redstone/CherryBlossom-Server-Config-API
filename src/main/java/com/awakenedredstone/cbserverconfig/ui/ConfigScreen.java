@@ -175,7 +175,7 @@ public class ConfigScreen extends SimpleGui {
         Utils.quickFillGui(this, FILLER);
     }
 
-    private void quickUpdate() {
+    private void quickUpdate(@Nullable Option<?> forceOption) {
         var a = new Object() {
             int slot = 10;
         };
@@ -184,13 +184,13 @@ public class ConfigScreen extends SimpleGui {
                 .skip(page * 7L)
                 .limit(7)
                 .forEachOrdered(optionEntry -> {
-            Option<?> option = optionEntry.getKey();
-            if (option.value() == values.get(option)) {
-                a.slot++;
-                return;
-            }
-            setConfigItem(a.slot++, optionEntry);
-        });
+                    Option<?> option = optionEntry.getKey();
+                    if (option.value() == values.get(option) && !option.equals(forceOption)) {
+                        a.slot++;
+                        return;
+                    }
+                    setConfigItem(a.slot++, optionEntry);
+                });
     }
 
     @SuppressWarnings("rawtypes")
@@ -223,25 +223,25 @@ public class ConfigScreen extends SimpleGui {
                         if (editor == null) return;
                         this.getPlayer().playSound(SoundEvents.UI_BUTTON_CLICK.value(), SoundCategory.MASTER, 0.3f, 1);
                         EditorRegistry.trigger(editor, value, type, action, this).whenComplete((o, throwable) -> values.put(option, o));
-                        quickUpdate();
+                        quickUpdate(option);
                     }
                     case MOUSE_RIGHT -> {
                         if (values.get(option) == option.value()) break;
                         this.player.playSound(SoundEvents.ENTITY_BLAZE_SHOOT, SoundCategory.MASTER, 0.3f, 1);
                         values.put(option, option.value());
-                        update();
+                        quickUpdate(option);
                     }
                     case DROP -> {
                         if (values.get(option) == option.defaultValue()) break;
                         this.player.playSound(SoundEvents.BLOCK_GLASS_BREAK, SoundCategory.MASTER, 0.3f, 1);
                         values.put(option, option.defaultValue());
-                        quickUpdate();
+                        quickUpdate(option);
                     }
                     default -> {
                         return;
                     }
                 }
-                quickUpdate();
+                quickUpdate(null);
             });
         }
         this.setSlot(slot, builder);
